@@ -1,0 +1,54 @@
+GSSHAPROJECT
+WMS WMS 9.1 (64-Bit)
+WATERSHED_MASK           "ProvoStochastic.msk"
+PROJECT_PATH             ""
+#LandSoil                "ProvoStochastic.lsf"
+#PROJECTION_FILE         "ProvoStochastic_prj.pro"
+#Batch mode
+REPLACE_LINE             1
+REPLACE_PARAMS           "ProvoStochastic_stoch_params.in"
+REPLACE_VALS             "ProvoStochastic_stoch_values.in"
+REPLACE_FOLDER           "ProvoStochastic_StochOutput\"
+SIMULATION_INPUT         "ProvoStochastic_stoch_siminput.txt"
+
+#regular input
+NON_ORTHO_CHANNELS
+FLINE                    "ProvoStochastic.map"
+METRIC
+GRIDSIZE                 90.000000
+ROWS                     96
+COLS                     122
+TOT_TIME                 5000
+TIMESTEP                 30
+OUTROW                   51
+OUTCOL                   1
+OUTSLOPE                 0.001000
+MAP_FREQ                 10
+HYD_FREQ                 10
+MAP_TYPE                 1
+OVERBANK_FLOW
+ELEVATION                "ProvoStochastic.ele"
+FLOOD_GRID               "ProvoStochastic.gfl"
+FLOOD_STREAM             "ProvoStochastic.cfl"
+DIFFUSIVE_WAVE
+CHANNEL_INPUT            "ProvoStochastic.cif"
+STREAM_CELL              "ProvoStochastic.gst"
+CHAN_POINT_INPUT         "../ProvoStochastic.ihg"
+#CHAN_POINT_INPUT_WMS    "ProvoStochastic.ihw"
+OVERTYPE                 ADE
+INF_REDIST
+#INDEXGRID_GUID          "LanUse.idx" "ff01b13f-cfb2-4560-878b-f68ded645c03"
+#INDEXGRID_GUID          "SoilType.idx" "bfc02cff-ad9f-4fdb-9383-5b5e8c40e621"
+OV_BOUNDARY
+MAPPING_TABLE            "ProvoStochastic.cmt"
+ST_MAPPING_TABLE         "ProvoStochastic.smt"
+SUMMARY                  "ProvoStochastic.sum"
+OUTLET_HYDRO             "ProvoStochastic.otl"
+PRECIP_UNIF
+RAIN_INTENSITY           5.200000
+RAIN_DURATION            180
+START_DATE               2010 06 07
+START_TIME               12 00
+IN_HYD_LOCATION          "ProvoStochastic.ihl"
+OUT_HYD_LOCATION         "ProvoStochastic.ohl"
+

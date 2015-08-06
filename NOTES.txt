@@ -1,0 +1,689 @@
+NFIE WORKSHOP - Provo Dam Break App
+
+#### 1. Create a new app
+
+a. Create a new app using the following command:
+
+        $ . t
+(tethys)$ cd ~/tethysdev
+(tethys)$ tethys scaffold dam_break
+
+b. Copy data into "data" directory
+
+c. Install the app for development:
+
+(tethys)$ cd tethysapp-dam_break
+(tethys)$ python setup.py develop
+
+d. Start the development server again and browse to the new app:
+
+(tethys)$ tethys manage start
+
+e. Open the new app project in Sublime using File > Open Folder..., select the "tethysapp-dam_break", and press "Open".
+
+###### 2. Create a New Directory in the app project directory (i.e.: dam_break) called "data" and copy the CSV files into it.
+
+##### CREATE A FORM ON HOME PAGE ######
+
+### home.html
+
+{% extends "dam_break/base.html" %}
+{% load tethys_gizmos %}
+
+{% block app_content %}
+  <h1>Generate Flood Hydrograph</h1>
+  <p>Use the controls below to adjust the flood hydrograph parameters.</p>
+  <form id='hydrograph-form' action="" method="post">
+    {% csrf_token %}
+    {% gizmo range_slider peak_flow_slider %}
+    {% gizmo range_slider time_peak_slider %}
+    {% gizmo range_slider peak_duration_slider %}
+    {% gizmo range_slider falling_limb_duration %}
+  </form>
+{% endblock %}
+
+{% block app_actions %}
+  {% gizmo button submit_button %}
+{% endblock %}
+
+### controllers.py
+
+from tethys_apps.sdk.gizmos import *
+
+def home(request):
+    """
+    Controller for the app home page.
+    """
+    peak_flow_slider = RangeSlider(
+                display_text='Peak Flow (cms)',
+                name='peak_flow',
+                min=500,
+                max=2400,
+                initial=800,
+                step=50
+    )
+
+    time_peak_slider = RangeSlider(
+                display_text='Time to Peak (hrs.)',
+                name='time_to_peak',
+                min=1,
+                max=12,
+                initial=6,
+                step=1
+    )
+
+    peak_duration_slider = RangeSlider(
+                display_text='Peak Duration (hrs.)',
+                name='peak_duration',
+                min=1,
+                max=12,
+                initial=6,
+                step=1
+    )
+
+    falling_limb_duration = RangeSlider(
+                display_text='Falling Limb Duration (hrs.)',
+                name='falling_limb_duration',
+                min=48,
+                max=96,
+                initial=72,
+                step=1
+    )
+
+    submit_button = Button(
+                display_text='Generate Hydrograph',
+                name='submit',
+                attributes='form=hydrograph-form',
+                submit=True
+    )
+
+    context = {'peak_flow_slider': peak_flow_slider,
+               'time_peak_slider': time_peak_slider,
+               'peak_duration_slider': peak_duration_slider,
+               'falling_limb_duration': falling_limb_duration,
+               'submit_button': submit_button
+    }
+
+    return render(request, 'dam_break/home.html', context)
+
+
+##### CREATE A NEW PAGE FOR THE HYDROGRAPH PLOT #####
+
+!!!!! REMEMBER TO PULL LATEST VERSION OF TETHYS 1.1.0 !!!!!
+
+### hydrograph.html
+
+{% extends "dam_break/base.html" %}
+
+{% block app_content %}
+  <h1>Flood Hydrograph</h1>
+{% endblock %}
+
+### controllers.py
+
+def hydrograph(request):
+    """
+    Controller for the hydrograph page.
+    """
+    context = {}
+
+    return render(request, 'dam_break/hydrograph.html', context)
+
+### app.py
+
+                    UrlMap(name='hydrograph',
+                           url='dam-break/hydrograph',
+                           controller='dam_break.controllers.hydrograph'),
+
+##### SET FORM ACTION TO SUBMIT TO PLOT PAGE #####
+
+### home.html
+...
+{% block app_content %}
+  <h1>Generate Flood Hydrograph</h1>
+  <p>Use the controls below to adjust the flood hydrograph parameters.</p>
+  <form id='hydrograph-form' action="{% url 'dam_break:hydrograph' %}" method="post">
+    ...
+  </form>
+{% endblock %}
+...
+
+### controllers.py
+
+def hydrograph(request):
+    """
+    Controller for the hydrograph page.
+    """
+    # Default Values
+    peak_flow = 800.0
+    time_to_peak = 6
+    peak_duration = 6
+    falling_limb_duration = 24
+
+    if request.POST  and 'submit' in request.POST:
+        peak_flow = float(request.POST['peak_flow'])
+        time_to_peak = int(request.POST['time_to_peak'])
+        peak_duration = int(request.POST['peak_duration'])
+        falling_limb_duration = int(request.POST['falling_limb_duration'])
+
+    context = {}
+
+    return render(request, 'dam_break/hydrograph.html', context)
+
+##### GENEREATE THE HYDROGRAPH AND FILE #####
+
+### utilities.py
+
+from datetime import datetime, timedelta
+
+def generate_flood_hydrograph(peak_flow, time_to_peak, peak_duration, falling_limb_duration):
+    """
+    Returns a flood hydrograph as a list of time value pairs.
+    """
+    # Magic numbers
+    TIMESTEPS_PER_HOUR = 6 # for 10 minute timesteps (i.e.: 6 * 10 = 60)
+    BUFFER_TIMESTEPS = 5
+    INITIAL_FLOW = 0.0
+    TIME_STEP = timedelta(minutes=10)
+    FIRST_STAGE_FACTOR = 1.0 / 3.0
+    DECIMALS = 2
+
+    # Initial conditions
+    hydrograph = []
+    date = datetime(year=2010, month=6, day=7, hour=11, minute=50)
+
+    # Initial Buffer
+    for i in range(BUFFER_TIMESTEPS):
+        date += TIME_STEP
+        hydrograph.append([date, INITIAL_FLOW])
+
+    # Calculate Rising Limb
+    steps = int(time_to_peak * TIMESTEPS_PER_HOUR)
+    rise_rate = peak_flow / steps
+
+    for i in range(steps):
+        date += TIME_STEP
+        flow = INITIAL_FLOW + (rise_rate * (i + 1))
+        hydrograph.append([date, round(flow, DECIMALS)])
+
+    # Calculate Peak Duration
+    steps = int(peak_duration * TIMESTEPS_PER_HOUR)
+
+    for i in range(steps):
+        date += TIME_STEP
+        hydrograph.append([date, peak_flow])
+
+    # Calculate Falling Limb
+    ## First Stage
+    first_stage_flow = peak_flow * FIRST_STAGE_FACTOR
+    first_stage_duration = falling_limb_duration * FIRST_STAGE_FACTOR
+    steps = int(first_stage_duration * TIMESTEPS_PER_HOUR)
+    rate = (peak_flow - first_stage_flow) / steps
+    
+    for i in range(steps):
+        date += TIME_STEP
+        flow = peak_flow - (rate * (i + 1))
+        hydrograph.append([date, round(flow, DECIMALS)])
+
+    ## Second Stage
+    second_stage_duration = falling_limb_duration - first_stage_duration
+    steps = int(second_stage_duration * TIMESTEPS_PER_HOUR)
+    rate = first_stage_flow / steps
+
+    for i in range(steps):
+        date += TIME_STEP
+        flow = first_stage_flow - (rate * (i + 1))
+        hydrograph.append([date, round(flow, DECIMALS)])
+
+    # Trailing Buffer
+    for i in range(BUFFER_TIMESTEPS):
+        date += TIME_STEP
+        hydrograph.append([date, INITIAL_FLOW])
+
+    return hydrograph
+
+
+def write_hydrograph_input_file(username, hydrograph):
+    """
+    Create the GSSHA input file needed to run the model.
+    """
+    project_directory = os.path.dirname(__file__)
+    user_workspace = os.path.join(project_directory, 'workspace', username)
+
+    if not os.path.exists(user_workspace):
+        os.makedirs(user_workspace)
+
+    input_file = os.path.join(user_workspace, 'ProvoStochastic.ihg')
+    
+    with open(input_file, 'w') as f:
+        f.write('NUMPT 1\r\n')
+        f.write('POINT 1 1 0.0\r\n')
+        f.write('NRPDS {0}\r\n'.format(len(hydrograph)))
+
+        for step in hydrograph:
+            date = step[0]
+            flow = step[1]
+
+            # INPUT 2010 06 07 12 00 0.000000
+            line = 'INPUT {0} {1:02d} {2:02d} {3:02d} {4:02d} {5}\r\n'.format(
+                date.year,
+                date.month,
+                date.day,
+                date.hour,
+                date.minute,
+                round(flow, 6)
+            )
+
+            f.write(line)
+
+### controllers.py
+
+from .utilities import generate_flood_hydrograph, write_hydrograph_input_file
+
+def hydrograph(request):
+    """
+    Controller for the hydrograph page.
+    """
+    ...
+    # Generate hydrograph
+    hydrograph = generate_flood_hydrograph(
+        peak_flow=peak_flow, 
+        time_to_peak=time_to_peak, 
+        peak_duration=peak_duration, 
+        falling_limb_duration=falling_limb_duration
+    )
+
+    # Write GSSHA file
+    write_hydrograph_input_file(
+        username=request.user.username, 
+        hydrograph=hydrograph                  
+    )
+
+    # Configure the Hydrograph Plot View
+    flood_hydrograph_plot = HighChartsTimeSeries(
+            title='Flood Hydrograph',
+            y_axis_title='Flow',
+            y_axis_units='cms',
+            series=[
+               {
+                   'name': 'Flood Hydrograph',
+                   'color': '#0066ff',
+                   'data': hydrograph
+               },
+            ]
+    )
+
+    flood_plot = PlotView(
+        highcharts_object=flood_hydrograph_plot,
+        width='100%',
+        height='500px'
+    )
+
+    context = {'flood_plot': flood_plot}
+
+    return render(request, 'dam_break/hydrograph.html', context)
+
+### hydrograph.html
+
+{% extends "dam_break/base.html" %}
+{% load tethys_gizmos %}
+
+{% block app_content %}
+  {% gizmo highcharts_plot_view flood_plot %}
+{% endblock %}
+
+
+
+##### CONFIGURE JOB MANAGER AND ADD SUBMIT CONTROLLER #####
+
+a. explain job manager and clusters
+
+b. show how to start a new cluster
+
+c. set up scheduler:
+
+#scheduler id: tc-win12.cloudapp.net
+
+#key location: ~/.ssh/id_rsa
+
+
+### app.py
+
+from tethys_compute.job_manager import JobTemplate, JobManager
+
+...
+
+                    UrlMap(name='run',
+                           url='dam-break/run',
+                           controller='dam_break.controllers.run')
+
+...
+
+    @classmethod
+    def job_templates(cls):
+        """
+        Example job_templates method.
+        """
+        job_templates = (JobTemplate(name='custom_flood',
+                                     type=JobManager.JOB_TYPES_DICT['CONDOR'],
+                                     parameters={'executable': 'gssha_custom_flood.py',
+                                                 'condorpy_template_name': 'vanilla_transfer_files',
+                                                 'attributes': {'transfer_input_files': '../../gssha_provo_flood, ../ProvoStochastic.ihg, ../max_flood_1.prj, ../provo_max_flood.sld'},
+                                                 'remote_input_files': ['../../data/gssha_provo_flood/gssha_custom_flood.py',
+                                                                        '../../data/Max Flood/max_flood_1.prj',
+                                                                        '../../data/Max Flood/provo_max_flood.sld',
+                                                                        'ProvoStochastic.ihg'],
+                                                },
+                                     ),
+                         )
+
+        return job_templates
+
+### controllers.py
+
+import os
+from django.http import HttpResponse
+from app import ProvoDamBreak as app
+import datetime
+
+...
+
+def run(request):
+    """
+    Execute the job that will run the GSSHA model
+    """
+    name = 'dam_break_%s' % (datetime.datetime.now().strftime('%Y%m%d%H%M%S'),)
+    project_directory = os.path.dirname(__file__)
+    user_workspace = os.path.join(project_directory, 'workspace', request.user.username)
+
+    job_mng = app.get_job_manager()
+    job = job_mng.create_job(name=name, user=request.user, template_name='custom_flood')
+    job.save()
+    job_id = job.id
+    job.set_attribute('arguments', job_id)
+    job.working_directory = user_workspace
+    job.execute()
+
+    return HttpResponse('Submitted')
+
+### hydrograph.html
+
+...
+{% block app_actions %}
+    <a class='btn btn-default' href="{% url 'dam_break:run' %}">Submit</a>
+{% endblock %}
+
+
+##### CREATE A JOBS TABLE PAGE #####
+
+### app.py
+                    UrlMap(name='jobs',
+                           url='dam-break/jobs',
+                           controller='dam_break.controllers.jobs')
+
+### controllers.py
+
+from django.shortcuts import render, redirect
+
+def run(request):
+    ....
+
+    ### DELETE return HttpResponse('Submitted')
+    return redirect('dam_break:jobs')
+
+def jobs(request):
+    """
+    Controller to show a table of the jobs
+    """
+    job_mng = app.get_job_manager()
+    jobs = job_mng.list_jobs(request.user)
+    context = {'jobs': jobs}
+
+    return render(request, 'dam_break/jobs.html', context)
+
+### jobs.html
+
+{% extends "dam_break/base.html" %}
+
+{% block app_content %}
+    <h1>Jobs</h1>
+    <table class='table table-striped'>
+        <tr>
+            <th>ID</th>
+      <th>Name</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Results</th>
+    </tr>
+
+    {% for job in jobs %}
+        <tr id='{{ job.id }}'>
+            <td class='name' data-id='' sytle='vertical-align: middle;'>{{ job.id }}</td>
+            <td class="name" data-id="" style="vertical-align: middle;">{{ job.name }}</td>
+        <td class="created" data-id="" style="vertical-align: middle;">{{ job.creation_time|date:'d M Y H:i' }}</td>
+        <td class="status" data-id="" style="vertical-align: middle;">{{ job.status }}</td>
+        <td class="results" style="vertical-align: middle;">
+        {% if job.status == "Complete" %}
+            <a class='btn btn-success btn-xs results-btn' href="">View Results</a>
+        {% endif %}
+        </td>
+        </tr>
+    {% endfor %}
+  </table>
+{% endblock %}
+
+
+
+
+##### CREATE A RESULTS PAGE THAT SHOWS THE FLOOD EXTENT ON A MAP #####
+
+### map.html
+
+{% extends "dam_break/base.html" %}
+{% load tethys_gizmos %}
+
+{% block app_content %}
+  <h1>Flood Extent</h1>
+  {% gizmo map_view map_options %}
+{% endblock %}
+
+
+### controllers.py
+
+def map(request, job_id):
+    """
+    Controller to handle map page.
+    """
+
+    # Define the map view
+    initial_view = MVView(
+        projection='EPSG:4326',
+        center=[-111.6390, 40.25715],
+        zoom=12
+    )
+
+    map_options = MapView(height='475px',
+                          width='100%',
+                          layers=[],
+                          legend=True,
+                          view=initial_view
+    )
+
+    context = {'map_options': map_options}
+    
+    return render(request, 'dam_break/map.html', context)
+
+### app.py
+
+                    UrlMap(name='map',
+                           url='dam-break/{job_id}/map',
+                           controller='dam_break.controllers.map'),
+
+
+##### REGISTER GEOSEVER WITH TETHYS THROUGH ADMIN PAGES #####
+
+1. Go to Site Admin from top right
+2. Click on link for spatial dataset services
+3. Click on the button to create a new spatial dataset services
+4. Create a spatial dataset service called 'default' that points at:
+
+    Endpoint: http://ciwmap.chpc.utah.edu:8080/geoserver/result
+    Username: admin
+    Password: geoserver
+
+
+##### INITIALIZE GEOSERVER WORKSPACE AND SHAPEFILE LAYERS #####
+
+!!!!! SETUP GEOSERVER !!!!!
+
+### controllers.py
+
+from tethys_apps.sdk import get_spatial_dataset_engine
+
+def map(request, job_id):
+    """
+    Controller to handle map page.
+    """
+    # Constants
+    PROJECT_DIR = os.path.dirname(__file__)
+    DATA_DIR = os.path.join(PROJECT_DIR, 'data')
+
+    # Initialize GeoServer Layers if not Created Already
+    geoserver_engine = get_spatial_dataset_engine('default')
+    response = geoserver_engine.list_workspaces()
+    
+    if response['success']:
+        workspaces = response['result']
+
+        if 'dambreak' not in workspaces:
+            # Create a GeoServer Workspace for the App
+            response = geoserver_engine.create_workspace(workspace_id='dambreak', 
+                                                         uri='tethys.ci-water.org/dam-break')
+
+            ## Paths to files
+            address_zip = os.path.join(DATA_DIR, 'Provo Address Points', 'Provo Address Points.zip')
+            address_sld = os.path.join(DATA_DIR, 'Provo Address Points', 'provo_address_points.sld')
+
+            ## Upload shapefile zip archive
+            geoserver_engine.create_shapefile_resource(
+                store_id='dambreak:provo_address_points',
+                shapefile_zip=address_zip,
+                overwrite=True,
+                debug=True
+            )
+
+            ## Upload SLD style
+            with open(address_sld, 'r') as sld:
+                geoserver_engine.create_style(
+                    style_id='dambreak:provo_address_points',
+                    sld=sld.read()
+                )
+
+            ## Assign style to shapfile layer
+            geoserver_engine.update_layer(
+                layer_id='dambreak:provo_address_points',
+                default_style='dambreak:provo_address_points'
+            )
+
+            ## Paths to files
+            boundary_zip = os.path.join(DATA_DIR, 'Provo Boundary', 'Provo Boundary.zip')
+            boundary_sld = os.path.join(DATA_DIR, 'Provo Boundary', 'provo_boundary.sld')
+
+            ## Upload shapefile zip archive
+            response = geoserver_engine.create_shapefile_resource(
+                store_id='dambreak:provo_boundary',
+                shapefile_zip=boundary_zip,
+                overwrite=True,
+                debug=True
+            )
+
+            ## Upload SLD style
+            with open(boundary_sld, 'r') as sld:
+                geoserver_engine.create_style(
+                    style_id='dambreak:provo_boundary',
+                    sld=sld.read()
+                )
+
+            ## Assign style to shapfile layer
+            geoserver_engine.update_layer(
+                layer_id='dambreak:provo_boundary',
+                default_style='dambreak:provo_boundary'
+            )
+    ...
+
+
+##### ADD THE TWO SHAPEFILE LAYERS TO THE MAP #####
+
+### controllers.py
+
+def map(request, job_id):
+    """
+    Controller to handle map page.
+    """
+    ...
+    flood_layer_id = 'dambreak:max_flood_{0}'.format(job_id)
+    
+    flood_extent_layer = MVLayer(
+            source='ImageWMS',
+            options={'url': 'http://ciwmap.chpc.utah.edu:8080/geoserver/wms',
+                     'params': {'LAYERS': flood_layer_id},
+                     'serverType': 'geoserver'},
+            legend_title='Flood',
+            legend_extent=[-111.74, 40.21, -111.61, 40.27],
+            legend_classes=[
+                MVLegendClass('polygon', 'Flood Extent', fill='#0000ff', stroke='#0000ff'),
+    ])
+
+    # Create Address and Boundary Layers
+    address_layer = MVLayer(
+            source='ImageWMS',
+            options={'url': 'http://ciwmap.chpc.utah.edu:8080/geoserver/wms',
+                     'params': {'LAYERS': 'dambreak:provo_address_points'},
+                     'serverType': 'geoserver'},
+            legend_title='Provo Addresses',
+            legend_extent=[-111.7419, 40.1850, -111.5361, 40.3293],
+            legend_classes=[
+                MVLegendClass('point', 'Addresses', fill='#000000'),
+    ])
+
+    boundary_layer = MVLayer(
+            source='ImageWMS',
+            options={'url': 'http://ciwmap.chpc.utah.edu:8080/geoserver/wms',
+                     'params': {'LAYERS': 'dambreak:provo_boundary'},
+                     'serverType': 'geoserver'},
+            legend_title='Provo City',
+            legend_extent=[-111.7419, 40.1850, -111.5361, 40.3293],
+            legend_classes=[
+                MVLegendClass('polygon', 'City Boundaries', fill='#ffffff', stroke='#ff0000'),
+    ])
+
+    ...
+
+    map_options = MapView(height='475px',
+                          width='100%',
+                          layers=[flood_extent_layer, address_layer, boundary_layer],
+                          legend=True,
+                          view=initial_view
+    )
+
+    context = {'map_options': map_options}
+    
+    return render(request, 'dam_break/map.html', context)
+
+##### LINK THE JOBS RESULTS BUTTONS TO THE MAP PAGE ######
+
+### jobs.html
+
+<a ... href="{% url 'dam_break:map' job_id=job.id %}">View Results</a>
+
+##### ADD NAVIGATION FOR THE APP #####
+
+### base.html
+
+...
+{% block app_navigation_items %}
+  <li class="title">App Navigation</li>
+  <li><a href="{% url 'dam_break:home' %}">New Scenario</a></li>
+  <li><a href="{% url 'dam_break:jobs' %}">Jobs</a></li>
+{% endblock %}
+...

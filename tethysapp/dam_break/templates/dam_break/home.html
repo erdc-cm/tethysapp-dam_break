@@ -1,0 +1,18 @@
+{% extends "dam_break/base.html" %}
+{% load tethys_gizmos %}
+
+{% block app_content %}
+  <h1>Generate Flood Hydrograph</h1>
+  <p>Use the controls below to adjust the flood hydrograph parameters.</p>
+  <form id='hydrograph-form' action="{% url 'dam_break:hydrograph' %}" method="post">
+    {% csrf_token %}
+    {% gizmo range_slider peak_flow_slider %}
+    {% gizmo range_slider time_peak_slider %}
+    {% gizmo range_slider peak_duration_slider %}
+    {% gizmo range_slider falling_limb_duration %}
+  </form>
+{% endblock %}
+
+{% block app_actions %}
+  {% gizmo button submit_button %}
+{% endblock %}

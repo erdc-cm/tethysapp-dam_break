@@ -1,0 +1,188 @@
+
+
+_________GSSHA start-up information________
+Run parameters read from WMS project file: ProvoStochastic.prj
+
+Using replacement values:
+  [GSSHA_0]      = 0.2965
+  [GSSHA_1]      = 0.0617
+  [GSSHA_2]      = 0.3743
+  [GSSHA_3]      = 0.0168
+  [GSSHA_4]      = 0.0864
+  [GSSHA_5]      = 0.0931
+  [GSSHA_6]      = 2.5785
+  [GSSHA_7]      = 1.6344
+  [GSSHA_8]      = 15.7460
+
+reading watershed mask from file: ProvoStochastic.msk
+number of grid cells in watershed: 7708
+reading elevation map from file: ProvoStochastic.ele
+outlet is in grid cell: 3753
+In map ProvoStochastic_bc.idx category 1 has 7689 values
+In map ProvoStochastic_bc.idx category 2 has 19 values
+In map SoilType.idx category 1 has 1567 values
+In map SoilType.idx category 2 has 2366 values
+In map SoilType.idx category 4 has 3775 values
+reading saturated hydraulic conductivity table and map from the master table file
+reading capillary drive map from the master table file
+reading porosity table and map from the master table file
+reading pore distribution index map from master table file
+reading residual saturation map from the master table file
+reading soil moisture table and map from the master table file
+In map SoilType.idx category 1 has 1567 values
+In map SoilType.idx category 2 has 2366 values
+In map SoilType.idx category 4 has 3775 values
+reading roughness table and map from master table file
+In map LanUse.idx category 11 has 2815 values
+In map LanUse.idx category 12 has 1034 values
+In map LanUse.idx category 14 has 531 values
+In map LanUse.idx category 16 has 19 values
+In map LanUse.idx category 17 has 147 values
+In map LanUse.idx category 21 has 2397 values
+In map LanUse.idx category 32 has 443 values
+In map LanUse.idx category 42 has 33 values
+In map LanUse.idx category 52 has 159 values
+In map LanUse.idx category 62 has 109 values
+In map LanUse.idx category 76 has 21 values
+reading channel input data from file ProvoStochastic.cif
+writing output for optimization to file 
+
+Total times a value was replaced: 221
+
+
+Was replacement value used?:
+  [GSSHA_0]      = Yes
+  [GSSHA_1]      = Yes
+  [GSSHA_2]      = Yes
+  [GSSHA_3]      = Yes
+  [GSSHA_4]      = Yes
+  [GSSHA_5]      = Yes
+  [GSSHA_6]      = Yes
+  [GSSHA_7]      = Yes
+  [GSSHA_8]      = Yes
+
+Running.... 
+
+Rainfall for this event ended. Runoff is complete
+         GSSHA EVENT RUNOFF SIMULATION SUMMARY
+            Event began on 06/07/2010 at 12:00
+   With uniform rainfall of    5.2 mm/h for  180.0 minutes.
+
+elevation and gridsize are in meters
+timestep                                    30.0 seconds
+number of timesteps with rain:             360
+elapsed time when rain began:               0.00
+ 
+peak occured on strict Julian date:       2455355.29930556
+date/time of peak discharge:              6/7/2010  19:11:00
+Event peak discharge (cubic meters per second):      129.0943
+
+Note: all volumes in cubic meters.
+initial volume of overland flow:                   0.0
+initial volume in channels:                        0.0
+initial liquid-equiv. volume of snow:              0.0
+ 
+volume of rainfall to overland:              973982.9
+volume of interception:                           0.0
+volume of direct evaporation:                     0.0
+volume of infiltrated water:                7141467.9
+volume of water exfiltrated:                      0.0
+volume of discharge:                        1704537.2
+volume of groundwater recharge:             9010884.1
+net volume of lateral inflow:             -11035517.9
+lateral flow into channel                     28084.3
+lateral flow out of channel                11063602.2
+volume of stream point sources:            12753633.0
+volume of stream point sinks:                     0.0
+volume of lake point sources:                     0.0
+volume of lake point sinks:                       0.0
+volume of lake evaporation:                       0.0
+volume from overland point sources:               0.0
+
+Volume to specified head (out):             4799311.9
+Volume from specified head (in):              68681.0
+Volume to specified slope (out):                  0.0
+Volume from specified discharge (in):             0.0
+Volume to specified discharge (out):              0.0
+Volume of specified discharge unmet:              0.0
+
+
+volume remaining on surface:                     40.0
+final volume in channels (cu. m):             13577.9
+final volume of snow (cu. m):                     0.0
+ 
+mass conservation error:                          0.995645 percent
+Note: positive mass conservation error indicates mass was created.
+Mass input + original mass:           13796296.926005 m3
+Mass output + final mass:             13658934.833546 m3
+mass cleanup error from overland:      0.000000 m3
+
+
+THE FOLLOWING WARNINGS ARE GIVEN:
+No Warnings.
+
+ THE FOLLOWING INPUTS WERE READ:
+A WMS Project File was used.
+Floating point GRASS maps were read.
+Locations where discharge hydrographs are to be written.
+
+ THE FOLLOWING PROCESSES WERE SIMULATED:
+Explicit diffusive-wave channel routing.
+Distributed overland roughness.
+Distributed initial soil moisture.
+Infiltration with redistribution.
+
+ THE FOLLOWING OUTPUT MAPS WERE WRITTEN EVERY 20 TIMESTEP(S):
+Soil surface moisture maps were output.
+Infiltration rate maps were output.
+ASCII WMS maps of:
+
+ THE FOLLOWING ASCII OUTPUT FILES WERE WRITTEN TO EVERY 20 TIMESTEP(S):
+     hydrograph at the catchment outlet.
+     hydrographs at selected locations.
+
+ 
+SIMULATION TOTALS
+GLOBAL MASS BALANCE CALCULATIONS 
+All volumes are in cubic meters 
+ 
+Initial volume on surface=                                0.00 
+Initial volume in channels=                               0.00 
+Initial volume in soil over simple soil depth       6556399.85 
+Initial volume in groundwater=                            0.00 
+
+Final volume on surface=                                 40.02
+Final volume in channels=                             13577.89
+Final volume in soil over simple soil depth         4686983.61
+Final volume in groundwater=                              0.00
+Final volume of snow=                                     0.00
+
+Total amount of precip=                              973982.88
+Total amount of interception=                             0.00
+Total amount of infiltration=                       7141467.85
+Total amount of evaporation=                              0.00
+Total direct evaporation=                                 0.00
+Total amount of exfiltration=                             0.00
+
+Total downward flux from unsaturated zone=          9010884.09
+Total flux of gw across bounds=                           0.00
+Total overland point sources=                             0.00
+Total channel point sources=                       12753633.00
+
+Volume lost to specified head boundary:             4799311.88
+Volume gained from specified head boundary:           68681.05
+Volume lost to specified slope boundary:                  0.00
+Volume gained from specified discharge boundary:          0.00
+Volume lost from specified discharge boundary:            0.00
+Volume of specified discharge boundary unmet:             0.00
+
+Total lateral inflow into channels=               -11035517.92
+Total amount of discharge=                          1704537.20
+
+Mass balance error of surface components =                0.994663 percent
+
+Overall mass balance error =                              0.674909 percent
+ 
+Simple soil moisture mass balance =                       -0.000000 percent 
+
+

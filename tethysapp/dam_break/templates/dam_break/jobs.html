@@ -1,0 +1,28 @@
+{% extends "dam_break/base.html" %}
+
+{% block app_content %}
+	<h1>Jobs</h1>
+	<table class='table table-striped'>
+		<tr>
+			<th>ID</th>
+      <th>Name</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Results</th>
+    </tr>
+
+    {% for job in jobs %}
+    	<tr id='{{ job.id }}'>
+    		<td class='name' data-id='' sytle='vertical-align: middle;'>{{ job.id }}</td>
+    		<td class="name" data-id="" style="vertical-align: middle;">{{ job.name }}</td>
+        <td class="created" data-id="" style="vertical-align: middle;">{{ job.creation_time|date:'d M Y H:i' }}</td>
+        <td class="status" data-id="" style="vertical-align: middle;">{{ job.status }}</td>
+        <td class="results" style="vertical-align: middle;">
+        {% if job.status == "Complete" %}
+        	<a class='btn btn-success btn-xs results-btn' href="{% url 'dam_break:map' job_id=job.id %}">View Results</a>
+        {% endif %}
+        </td>
+    	</tr>
+    {% endfor %}
+  </table>
+{% endblock %}
