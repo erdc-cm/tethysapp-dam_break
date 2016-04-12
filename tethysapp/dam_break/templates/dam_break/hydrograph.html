@@ -1,10 +1,5 @@
 {% extends "dam_break/base.html" %}
-{% load tethys_gizmos %}
 
 {% block app_content %}
-  {% gizmo highcharts_plot_view flood_plot %}
-{% endblock %}
-
-{% block app_actions %}
-  <a class='btn btn-default' href="{% url 'dam_break:run' %}">Submit</a>
+  <h1>Flood Hydrograph</h1>
 {% endblock %}
