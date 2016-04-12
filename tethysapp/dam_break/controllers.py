@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from tethys_apps.sdk.gizmos import *
 
+from .model import SessionMaker, Dam
 from .utilities import generate_flood_hydrograph, write_hydrograph_input_file
 
 @login_required()
@@ -121,21 +122,65 @@ def map(request):
     """
     Controller to handle map page.
     """
+    # Create a session
+    session = SessionMaker()
 
-    # Define the map view
-    initial_view = MVView(
+    # Query DB for gage objects
+    dams = session.query(Dam).all()
+
+    # Transform into GeoJSON format
+    features = []
+    lat_list = []
+    lon_list = []
+    for dam in dams:
+        lon_list.append(dam.longitude)
+        lat_list.append(dam.latitude)
+        dam_feature = {
+          'type': 'Feature',
+          'geometry': {
+            'type': 'Point',
+            'coordinates': [dam.longitude, dam.latitude]
+          }
+        }
+
+        features.append(dam_feature)
+
+    geojson_gages = {
+      'type': 'FeatureCollection',
+      'crs': {
+        'type': 'name',
+        'properties': {
+          'name': 'EPSG:4326'
+        }
+      },
+      'features': features
+    }
+
+    # Define layer for Map View
+    delta = 0.01
+    geojson_layer = MVLayer(source='GeoJSON',
+                            options=geojson_gages,
+                            legend_title='Dam Locations',
+                            legend_extent=[min(lon_list)-delta, min(lat_list)-delta, max(lon_list)+delta, max(lat_list)+delta])
+
+    # Define initial view for Map View
+    view_options = MVView(
         projection='EPSG:4326',
-        center=[-111.6390, 40.25715],
-        zoom=12
+        center=[sum(lon_list)/float(len(lon_list)), sum(lat_list)/float(len(lat_list))],
+        zoom=10,
+        maxZoom=18,
+        minZoom=2
     )
 
-    map_options = MapView(height='475px',
+    # Configure the map
+    map_options = MapView(height='500px',
                           width='100%',
-                          layers=[],
-                          legend=True,
-                          view=initial_view
-    )
+                          layers=[geojson_layer],
+                          view=view_options,
+                          basemap='OpenStreetMap',
+                          legend=True)
 
+    # Pass variables to the template via the context dictionary
     context = {'map_options': map_options}
 
     return render(request, 'dam_break/map.html', context)

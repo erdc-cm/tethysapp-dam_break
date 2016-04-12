@@ -1,5 +1,5 @@
 from tethys_sdk.base import TethysAppBase, url_map_maker
-
+from tethys_sdk.stores import PersistentStore
 
 class DamBreak(TethysAppBase):
     """
@@ -35,3 +35,15 @@ class DamBreak(TethysAppBase):
         )
 
         return url_maps
+        
+    def persistent_stores(self):
+        """
+        Add one or more persistent stores
+        """
+        stores = (PersistentStore(name='dam_info_db',
+                                  initializer='dam_break.init_stores.init_dam_info_db',
+                                  spatial=True
+                ),
+        )
+
+        return stores
