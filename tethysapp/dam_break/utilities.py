@@ -1,20 +1,6 @@
-import os
-import subprocess
+# -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
-
-from tethys_apps.base.persistent_store import get_persistent_store_engine as gpse
-
-
-def get_persistent_store_engine(persistent_store_name):
-    """
-    Returns an SQLAlchemy engine object for the persistent store name provided.
-    """
-    # Derive app name
-    app_name = os.path.split(os.path.dirname(__file__))[1]
-
-    # Get engine
-    return gpse(app_name, persistent_store_name)
-
+import os
 
 def generate_flood_hydrograph(peak_flow, time_to_peak, peak_duration, falling_limb_duration):
     """
@@ -59,7 +45,7 @@ def generate_flood_hydrograph(peak_flow, time_to_peak, peak_duration, falling_li
     first_stage_duration = falling_limb_duration * FIRST_STAGE_FACTOR
     steps = int(first_stage_duration * TIMESTEPS_PER_HOUR)
     rate = (peak_flow - first_stage_flow) / steps
-    
+
     for i in range(steps):
         date += TIME_STEP
         flow = peak_flow - (rate * (i + 1))
@@ -94,7 +80,7 @@ def write_hydrograph_input_file(username, hydrograph):
         os.makedirs(user_workspace)
 
     input_file = os.path.join(user_workspace, 'ProvoStochastic.ihg')
-    
+
     with open(input_file, 'w') as f:
         f.write('NUMPT 1\r\n')
         f.write('POINT 1 1 0.0\r\n')
@@ -115,4 +101,3 @@ def write_hydrograph_input_file(username, hydrograph):
             )
 
             f.write(line)
-

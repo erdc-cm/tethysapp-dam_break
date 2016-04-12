@@ -6,7 +6,7 @@ from tethys_apps.app_installation import custom_develop_command, custom_install_
 ### Apps Definition ###
 app_package = 'dam_break'
 release_package = 'tethysapp-' + app_package
-app_class = 'dam_break.app:ProvoDamBreak'
+app_class = 'dam_break.app:DamBreak'
 app_package_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tethysapp', app_package)
 
 ### Python Dependencies ###
@@ -18,10 +18,10 @@ setup(
     description='',
     long_description='',
     keywords='',
-    author='',
+    author='Tethys Platform Development Team',
     author_email='',
-    url='',
-    license='',
+    url='www.tethysplatform.org',
+    license='BSD 3-Clause',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     namespace_packages=['tethysapp', 'tethysapp.' + app_package],
     include_package_data=True,
