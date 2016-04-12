@@ -115,3 +115,27 @@ def hydrograph(request):
     context = {'flood_plot': flood_plot}
 
     return render(request, 'dam_break/hydrograph.html', context)
+
+@login_required()
+def map(request):
+    """
+    Controller to handle map page.
+    """
+
+    # Define the map view
+    initial_view = MVView(
+        projection='EPSG:4326',
+        center=[-111.6390, 40.25715],
+        zoom=12
+    )
+
+    map_options = MapView(height='475px',
+                          width='100%',
+                          layers=[],
+                          legend=True,
+                          view=initial_view
+    )
+
+    context = {'map_options': map_options}
+
+    return render(request, 'dam_break/map.html', context)

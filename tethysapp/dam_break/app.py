@@ -29,6 +29,9 @@ class DamBreak(TethysAppBase):
                     UrlMap(name='hydrograph',
                            url='dam-break/hydrograph',
                            controller='dam_break.controllers.hydrograph'),
+                    UrlMap(name='map',
+                           url='dam-break/map',
+                           controller='dam_break.controllers.map'),
         )
 
         return url_maps
