@@ -21,8 +21,16 @@ def init_dam_info_db(first_time):
                    peak_duration=1,
                    falling_limb_duration=96)
 
-
         session.add(dam1)
 
+        dam2 = Dam(latitude=40.598168,
+                   longitude=-111.424055,
+                   peak_flow=500,
+                   time_peak=6,
+                   peak_duration=6,
+                   falling_limb_duration=40)
+
+        session.add(dam2)
+        
         session.commit()
         session.close()

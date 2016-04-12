@@ -140,6 +140,12 @@ def map(request):
           'geometry': {
             'type': 'Point',
             'coordinates': [dam.longitude, dam.latitude]
+          },
+          'properties': {
+              'peak_flow' : dam.peak_flow,
+              'time_peak' : dam.time_peak,
+              'peak_duration' : dam.peak_duration,
+              'falling_limb_duration' : dam.falling_limb_duration,
           }
         }
 
@@ -161,7 +167,8 @@ def map(request):
     geojson_layer = MVLayer(source='GeoJSON',
                             options=geojson_gages,
                             legend_title='Dam Locations',
-                            legend_extent=[min(lon_list)-delta, min(lat_list)-delta, max(lon_list)+delta, max(lat_list)+delta])
+                            legend_extent=[min(lon_list)-delta, min(lat_list)-delta, max(lon_list)+delta, max(lat_list)+delta],
+                            feature_selection=True)
 
     # Define initial view for Map View
     view_options = MVView(
@@ -169,7 +176,7 @@ def map(request):
         center=[sum(lon_list)/float(len(lon_list)), sum(lat_list)/float(len(lat_list))],
         zoom=10,
         maxZoom=18,
-        minZoom=2
+        minZoom=2,
     )
 
     # Configure the map
@@ -178,7 +185,8 @@ def map(request):
                           layers=[geojson_layer],
                           view=view_options,
                           basemap='OpenStreetMap',
-                          legend=True)
+                          legend=True,
+                          )
 
     # Pass variables to the template via the context dictionary
     context = {'map_options': map_options}
