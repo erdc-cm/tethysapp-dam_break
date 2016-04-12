@@ -74,7 +74,7 @@ def write_hydrograph_input_file(username, hydrograph):
     Create the GSSHA input file needed to run the model.
     """
     project_directory = os.path.dirname(__file__)
-    user_workspace = os.path.join(project_directory, 'workspace', username)
+    user_workspace = os.path.join(project_directory, 'workspaces', 'user_workspaces')
 
     if not os.path.exists(user_workspace):
         os.makedirs(user_workspace)
