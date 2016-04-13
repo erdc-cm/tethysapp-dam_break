@@ -94,21 +94,17 @@ def hydrograph(request):
     )
 
     # Configure the Hydrograph Plot View
-    flood_hydrograph_plot = HighChartsTimeSeries(
-            title='Flood Hydrograph',
-            y_axis_title='Flow',
-            y_axis_units='cms',
-            series=[
-               {
-                   'name': 'Flood Hydrograph',
-                   'color': '#0066ff',
-                   'data': hydrograph
-               },
-            ]
-    )
-
-    flood_plot = PlotView(
-        highcharts_object=flood_hydrograph_plot,
+    flood_plot = TimeSeries(
+        title='Flood Hydrograph',
+        y_axis_title='Flow',
+        y_axis_units='cms',
+        series=[
+           {
+               'name': 'Flood Hydrograph',
+               'color': '#0066ff',
+               'data': hydrograph,
+           },
+        ],
         width='100%',
         height='500px'
     )
@@ -248,21 +244,17 @@ def hydrograph_ajax(request):
     )
 
     # Configure the Hydrograph Plot View
-    flood_hydrograph_plot = HighChartsTimeSeries(
-            title='Flood Hydrograph',
-            y_axis_title='Flow',
-            y_axis_units='cms',
-            series=[
-               {
-                   'name': 'Flood Hydrograph',
-                   'color': '#0066ff',
-                   'data': hydrograph
-               },
-            ]
-    )
-
-    flood_plot = PlotView(
-        highcharts_object=flood_hydrograph_plot,
+    flood_plot = TimeSeries(
+        title='Flood Hydrograph',
+        y_axis_title='Flow',
+        y_axis_units='cms',
+        series=[
+           {
+               'name': 'Flood Hydrograph',
+               'color': '#0066ff',
+               'data': hydrograph,
+           },
+        ],
         width='500px',
         height='500px'
     )
