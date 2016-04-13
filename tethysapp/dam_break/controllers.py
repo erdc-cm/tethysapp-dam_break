@@ -170,7 +170,8 @@ def map(request):
     geojson_layer = MVLayer(source='GeoJSON',
                             options=geojson_gages,
                             legend_title='Dam Locations',
-                            legend_extent=[min(lon_list)-delta, min(lat_list)-delta, max(lon_list)+delta, max(lat_list)+delta])
+                            legend_extent=[min(lon_list)-delta, min(lat_list)-delta, max(lon_list)+delta, max(lat_list)+delta],
+                            feature_selection=True)
 
     # Define initial view for Map View
     view_options = MVView(
@@ -190,8 +191,13 @@ def map(request):
                           legend=True,
                           )
 
+    hydrograph_box = MessageBox(name='hydrograph_modal',
+                                title='Flood Hydrograph',
+                                message='Loading ...')
+                            
     # Pass variables to the template via the context dictionary
-    context = {'map_options': map_options}
+    context = {'map_options': map_options,
+               'hydrograph_box': hydrograph_box}
 
     return render(request, 'dam_break/map.html', context)
 
@@ -215,3 +221,52 @@ def table(request):
     session.close()
     
     return rendered_page
+
+@login_required()
+def hydrograph_ajax(request):
+    """
+    Controller for the hydrograph ajax request.
+    """
+    # Default Values
+    peak_flow = 800.0
+    time_to_peak = 6
+    peak_duration = 6
+    falling_limb_duration = 24
+
+    if request.GET:
+        peak_flow = float(request.GET['peak_flow'])
+        time_to_peak = int(request.GET['time_to_peak'])
+        peak_duration = int(request.GET['peak_duration'])
+        falling_limb_duration = int(request.GET['falling_limb_duration'])
+
+    # Generate hydrograph
+    hydrograph = generate_flood_hydrograph(
+        peak_flow=peak_flow, 
+        time_to_peak=time_to_peak, 
+        peak_duration=peak_duration, 
+        falling_limb_duration=falling_limb_duration
+    )
+
+    # Configure the Hydrograph Plot View
+    flood_hydrograph_plot = HighChartsTimeSeries(
+            title='Flood Hydrograph',
+            y_axis_title='Flow',
+            y_axis_units='cms',
+            series=[
+               {
+                   'name': 'Flood Hydrograph',
+                   'color': '#0066ff',
+                   'data': hydrograph
+               },
+            ]
+    )
+
+    flood_plot = PlotView(
+        highcharts_object=flood_hydrograph_plot,
+        width='500px',
+        height='500px'
+    )
+
+    context = {'flood_plot': flood_plot}
+
+    return render(request, 'dam_break/hydrograph_ajax.html', context)
