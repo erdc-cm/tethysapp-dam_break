@@ -14,9 +14,9 @@
 
 {% block app_navigation_items %}
   <li class="title">App Navigation</li>
-  <li class="active"><a href="{% url 'dam_break:home' %}">Home</a></li>
-  <li><a href="{% url 'dam_break:map' %}">Map</a></li>
-
+  <li {% if request.path == "/apps/dam-break/" %} class="active" {% endif %}><a href="{% url 'dam_break:home' %}">Home</a></li>
+  <li {% if 'map' in request.path %} class="active" {% endif %}><a href="{% url 'dam_break:map' %}">Map</a></li>
+  <li {% if 'table' in request.path %} class="active" {% endif %}><a href="{% url 'dam_break:table' %}">Table</a></li>
 {% endblock %}
 
 {% block app_content %}

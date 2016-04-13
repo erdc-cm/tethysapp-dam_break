@@ -32,6 +32,9 @@ class DamBreak(TethysAppBase):
                     UrlMap(name='map',
                            url='dam-break/map',
                            controller='dam_break.controllers.map'),
+                    UrlMap(name='table',
+                           url='dam-break/table',
+                           controller='dam_break.controllers.table'),
         )
 
         return url_maps

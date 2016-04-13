@@ -125,7 +125,7 @@ def map(request):
     # Create a session
     session = SessionMaker()
 
-    # Query DB for gage objects
+    # Query DB for dam objects
     dams = session.query(Dam).all()
 
     # Transform into GeoJSON format
@@ -151,6 +151,9 @@ def map(request):
 
         features.append(dam_feature)
 
+    #make sure you close the session
+    session.close()
+    
     geojson_gages = {
       'type': 'FeatureCollection',
       'crs': {
@@ -191,3 +194,24 @@ def map(request):
     context = {'map_options': map_options}
 
     return render(request, 'dam_break/map.html', context)
+
+@login_required()
+def table(request):
+    """
+    Controller to handle table page.
+    """
+    # Create a session
+    session = SessionMaker()
+
+    # Query DB for dam objects
+    dams = session.query(Dam).all()
+
+    # Pass variables to the template via the context dictionary
+    context = {'dams': dams}
+    
+    rendered_page = render(request, 'dam_break/table.html', context)
+    
+    #make sure you close the session before exiting
+    session.close()
+    
+    return rendered_page
