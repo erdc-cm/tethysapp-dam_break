@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from tethys_apps.sdk.gizmos import *
+from tethys_sdk.gizmos import *
 
 @login_required()
 def home(request):
