@@ -1,0 +1,24 @@
+{% extends "dam_break/base.html" %}
+
+{% block app_content %}
+  <h1>Table of Dams</h1>
+  <table class='table table-striped'>
+  <tr>
+    <th>ID</th>
+    <th>Peak Flow</th>
+    <th>Time to Peak</th>
+    <th>Peak Duration</th>
+    <th>Falling Limb Duration</th>
+  </tr>
+
+  {% for dam in dams %}
+  <tr id='{{ dam.id }}'>
+      <td style="vertical-align: middle;">{{ dam.id }}</td>
+      <td style="vertical-align: middle;">{{ dam.peak_flow }}</td>
+      <td style="vertical-align: middle;">{{ dam.time_peak }}</td>
+      <td style="vertical-align: middle;">{{ dam.peak_duration }}</td>
+      <td style="vertical-align: middle;">{{ dam.falling_limb_duration }}</td>
+  </tr>
+  {% endfor %}
+  </table>
+{% endblock %}
