@@ -12,7 +12,7 @@ class DamBreak(TethysAppBase):
     package = 'dam_break'
     root_url = 'dam-break'
     color = '#1abc9c'
-    description = 'Place a brief description of your app here.'
+    description = 'This app is for demonstrating how to use Tethys Platform.'
     enable_feedback = False
     feedback_emails = []
 
