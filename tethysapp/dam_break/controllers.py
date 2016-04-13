@@ -167,8 +167,7 @@ def map(request):
     geojson_layer = MVLayer(source='GeoJSON',
                             options=geojson_gages,
                             legend_title='Dam Locations',
-                            legend_extent=[min(lon_list)-delta, min(lat_list)-delta, max(lon_list)+delta, max(lat_list)+delta],
-                            feature_selection=True)
+                            legend_extent=[min(lon_list)-delta, min(lat_list)-delta, max(lon_list)+delta, max(lat_list)+delta])
 
     # Define initial view for Map View
     view_options = MVView(
