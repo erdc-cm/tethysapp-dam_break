@@ -35,10 +35,8 @@ var MAP_DAM_BREAK = (function() {
                 $("#hydrograph_modal").find('.modal-body').html(data);
                 // display modal
                 $('#hydrograph_modal').modal('show');    
-                // Get string from data-json attribute of element
-                var json_string = $('.highcharts-plot').attr('data-json');
-                //convert to highcharts plot
-                $('.highcharts-plot').highcharts(JSON.parse(json_string));
+                //Initialize Plot
+                TETHYS_PLOT_VIEW.initHighChartsPlot($('.highcharts-plot'));
             }
         });
     };
