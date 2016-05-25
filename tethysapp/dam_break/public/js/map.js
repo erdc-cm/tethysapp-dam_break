@@ -46,7 +46,25 @@ var MAP_DAM_BREAK = (function() {
     *************************************************************************/
     
     $(function() {
+
+        //var overview_map = new ol.control.OverviewMap(),
+        //overview_map.setMap(m_map);
         m_select_interaction = TETHYS_MAP_VIEW.getSelectInteraction();
+        //to make sure that you always get something on click
+        var map = TETHYS_MAP_VIEW.getMap();
+        map.on("click", function(evt) {
+            var feature_collection = m_select_interaction.getFeatures();
+            if(feature_collection.getArray().length <=0) {
+                this.getLayers().forEach(function(layer, i) {
+                    var source = layer.getSource()
+                    if (source instanceof ol.source.Vector) {
+                        var closest_feature = source.getClosestFeatureToCoordinate(evt.coordinate);
+                        feature_collection.push(closest_feature);
+                    }
+                });
+            }
+
+        });
 
         //when selected, call function to make hydrograph
         m_select_interaction.getFeatures().on('change:length', function(e) {
@@ -56,7 +74,6 @@ var MAP_DAM_BREAK = (function() {
                 getModalHTML();
             }
         });
-
         $('#hydrograph_modal').on('hidden.bs.modal', function () {
             m_select_interaction.getFeatures().clear(); //clear selection on close
         });
