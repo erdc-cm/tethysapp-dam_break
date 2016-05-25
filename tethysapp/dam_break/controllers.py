@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from json import dumps as jdumps
+import numpy as np
 from tethys_sdk.gizmos import *
 
 from .model import SessionMaker, Dam
@@ -262,3 +264,48 @@ def hydrograph_ajax(request):
     context = {'flood_plot': flood_plot}
 
     return render(request, 'dam_break/hydrograph_ajax.html', context)
+
+@login_required()
+def raster_map(request):
+    """
+    Controller for the raster_map request.
+    """
+    
+    lat_list = np.arange(30, 31, 0.1)   
+    lon_list = np.arange(-92, -90, 0.2)
+
+    features = []
+    for lat_idx in xrange(len(lat_list)-1):
+        for lon_idx in xrange(len(lon_list)-1):
+            features.append({
+              'type': 'Feature',
+              'geometry': {
+                'type': 'Polygon',
+                'coordinates': [
+                                 [ [lon_list[lon_idx], lat_list[lat_idx]], 
+                                  [lon_list[lon_idx+1], lat_list[lat_idx]], 
+                                  [lon_list[lon_idx+1], lat_list[lat_idx+1]], 
+                                  [lon_list[lon_idx], lat_list[lat_idx+1]], 
+                                  [lon_list[lon_idx], lat_list[lat_idx]] ]
+                               ]
+              },
+              'properties': {
+                  'elevation' : np.random.rand()*100,
+              }
+            })
+
+    raster_json = {
+      'type': 'FeatureCollection',
+      'crs': {
+        'type': 'name',
+        'properties': {
+          'name': 'EPSG:4326'
+        }
+      },
+      'features': features
+    }
+    
+    
+    context = {'raster_json': jdumps(raster_json)}
+
+    return render(request, 'dam_break/raster_map.html', context)
