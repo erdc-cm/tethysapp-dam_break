@@ -282,11 +282,11 @@ def raster_map(request):
               'geometry': {
                 'type': 'Polygon',
                 'coordinates': [
-                                 [ [lon_list[lon_idx], lat_list[lat_idx]], 
+                                 [[lon_list[lon_idx], lat_list[lat_idx]], 
                                   [lon_list[lon_idx+1], lat_list[lat_idx]], 
                                   [lon_list[lon_idx+1], lat_list[lat_idx+1]], 
                                   [lon_list[lon_idx], lat_list[lat_idx+1]], 
-                                  [lon_list[lon_idx], lat_list[lat_idx]] ]
+                                  [lon_list[lon_idx], lat_list[lat_idx]]]
                                ]
               },
               'properties': {
