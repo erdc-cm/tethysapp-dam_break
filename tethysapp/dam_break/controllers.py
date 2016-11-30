@@ -247,6 +247,7 @@ def hydrograph_ajax(request):
 
     # Configure the Hydrograph Plot View
     flood_plot = TimeSeries(
+        engine='highcharts',
         title='Flood Hydrograph',
         y_axis_title='Flow',
         y_axis_units='cms',
